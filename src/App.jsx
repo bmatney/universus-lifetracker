@@ -132,8 +132,8 @@ export default function App() {
             </div>
 
             <div className="block-buttons">
-              <button onClick={() => resolveBlock("full")}>Full Block</button>
-              <button onClick={() => resolveBlock("half")}>Half Block</button>
+              <button onClick={() => resolveBlock("full")}>Full</button>
+              <button onClick={() => resolveBlock("half")}>Half</button>
               <button onClick={() => resolveBlock("none")}>Unblocked</button>
             </div>
           </div>
