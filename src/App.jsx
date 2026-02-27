@@ -38,8 +38,8 @@ function App() {
       const life = playerNum === 1 ? player1Life : player2Life;
       const setLife = playerNum === 1 ? setPlayer1Life : setPlayer2Life;
 
-      // Main screen orientation:
-      // Player 1 faces themselves, Player 2 is mirrored
+      // Main screen orientation
+      // Player 1 upright, Player 2 mirrored
       let rotateClass = "";
       if (!attackingPlayer) {
         rotateClass = playerNum === 2 ? "player-rotate" : "";
@@ -55,8 +55,8 @@ function App() {
           <div className="player-name">Player {playerNum}</div>
           <div className="life-total">{life}</div>
           <div className="controls">
-            <button onClick={() => setLife(life + 1)}>+</button>
-            <button onClick={() => setLife(life - 1)}>-</button>
+            <button onClick={() => setLife((l) => l + 1)}>+</button>
+            <button onClick={() => setLife((l) => l - 1)}>-</button>
           </div>
         </div>
       );
@@ -65,7 +65,7 @@ function App() {
   );
 
   return (
-    <div className="container">
+    <div className={`container ${!attackingPlayer ? "main-screen" : ""}`}>
       {renderPlayer(2)}
       {renderPlayer(1)}
 
