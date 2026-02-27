@@ -1,151 +1,150 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import "./App.css";
 
-const ZONES = {
-  High: "red",
-  Mid: "orange",
-  Low: "yellow",
-};
+function App() {
+  const [player1Life, setPlayer1Life] = useState(25);
+  const [player2Life, setPlayer2Life] = useState(25);
+  const [attackingPlayer, setAttackingPlayer] = useState(null); // 1 or 2
+  const [attackZone, setAttackZone] = useState("high");
+  const [attackSpeed, setAttackSpeed] = useState(4);
+  const [attackDamage, setAttackDamage] = useState(4);
 
-export default function App() {
-  const [life, setLife] = useState([25, 25]);
-  const [defender, setDefender] = useState(null);
-  const [zone, setZone] = useState("High");
-  const [speed, setSpeed] = useState(4);
-  const [damage, setDamage] = useState(4);
-  const [gameOver, setGameOver] = useState(false);
+  const closePanel = useCallback(() => setAttackingPlayer(null), []);
 
-  const attacker = defender !== null ? (defender === 0 ? 1 : 0) : null;
+  const applyAttack = useCallback(
+    (type) => {
+      const damageToApply = Math.max(
+        0,
+        type === "full"
+          ? attackDamage
+          : type === "half"
+          ? Math.ceil(attackDamage / 2)
+          : 0
+      );
 
-  function adjustLife(player, amount) {
-    setLife((prev) => {
-      const updated = [...prev];
-      updated[player] += amount;
-      if (updated[player] <= 0) setGameOver(true);
-      return updated;
-    });
-  }
+      if (attackingPlayer === 1) {
+        setPlayer1Life((l) => l - damageToApply);
+      } else {
+        setPlayer2Life((l) => l - damageToApply);
+      }
 
-  function openAttack(defendingPlayer) {
-    if (gameOver) return;
-    setDefender(defendingPlayer);
-    setZone("High");
-    setSpeed(4);
-    setDamage(4);
-  }
+      closePanel();
+    },
+    [attackingPlayer, attackDamage, closePanel]
+  );
 
-  function cancelAttack() {
-    setDefender(null);
-  }
+  const renderPlayer = useCallback(
+    (playerNum) => {
+      const life = playerNum === 1 ? player1Life : player2Life;
+      const setLife = playerNum === 1 ? setPlayer1Life : setPlayer2Life;
 
-  function resolveBlock(type) {
-    let finalDamage = Math.max(0, damage);
-    if (type === "full") finalDamage = 0;
-    if (type === "half") finalDamage = Math.ceil(finalDamage / 2);
+      // Main screen orientation:
+      // Player 1 faces themselves, Player 2 is mirrored
+      let rotateClass = "";
+      if (!attackingPlayer) {
+        rotateClass = playerNum === 2 ? "player-rotate" : "";
+      } else {
+        rotateClass = attackingPlayer !== playerNum ? "player-rotate" : "";
+      }
 
-    adjustLife(defender, -finalDamage);
-    setDefender(null);
-  }
-
-  function newGame() {
-    setLife([25, 25]);
-    setDefender(null);
-    setGameOver(false);
-  }
+      return (
+        <div
+          className={`player ${rotateClass}`}
+          onClick={() => setAttackingPlayer(playerNum)}
+        >
+          <div className="player-name">Player {playerNum}</div>
+          <div className="life-total">{life}</div>
+          <div className="controls">
+            <button onClick={() => setLife(life + 1)}>+</button>
+            <button onClick={() => setLife(life - 1)}>-</button>
+          </div>
+        </div>
+      );
+    },
+    [player1Life, player2Life, attackingPlayer]
+  );
 
   return (
     <div className="container">
-      {[0, 1].map((p) => {
-        const isDefender = p === defender;
-        const rotation =
-          isDefender && defender !== null
-            ? `rotate(${attacker === 0 ? 180 : 0}deg)` // main life rotates to face attacker
-            : p === 0
-            ? "rotate(180deg)"
-            : "rotate(0deg)";
+      {renderPlayer(2)}
+      {renderPlayer(1)}
 
-        return (
-          <div
-            key={p}
-            className={`player ${p === 0 ? "player-top" : "player-bottom"}`}
-            style={{ transform: rotation }}
-          >
-            <div className="player-name">Player {p + 1}</div>
-            <div className="life-total" onClick={() => openAttack(p)}>
-              {life[p]}
-            </div>
-            <div className="controls">
-              <button onClick={() => adjustLife(p, -1)}>-</button>
-              <button onClick={() => adjustLife(p, 1)}>+</button>
-            </div>
-          </div>
-        );
-      })}
-
-      {defender !== null && (
-        <div className="modal-backdrop" onClick={cancelAttack}>
+      {attackingPlayer && (
+        <div className="modal-backdrop" onClick={closePanel}>
           <div
             className={`attack-panel ${
-              defender === 0 ? "attack-face-down" : "attack-face-up"
+              attackingPlayer === 1 ? "attack-face-up" : "attack-face-down"
             }`}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Life totals inside panel stay upright */}
             <div className="attack-life-bar">
-              {[0, 1].map((p) => (
-                <div key={p} className="attack-life">
-                  <div className="life-total">{life[p]}</div>
-                  <div className="controls">
-                    <button onClick={() => adjustLife(p, -1)}>-</button>
-                    <button onClick={() => adjustLife(p, 1)}>+</button>
-                  </div>
+              <div className="attack-life">
+                <div className="attack-player-name">Player 1</div>
+                <div className="attack-player-life">{player1Life}</div>
+                <div className="controls">
+                  <button onClick={() => setPlayer1Life((l) => l + 1)}>+</button>
+                  <button onClick={() => setPlayer1Life((l) => l - 1)}>-</button>
                 </div>
-              ))}
+              </div>
+              <div className="attack-life">
+                <div className="attack-player-name">Player 2</div>
+                <div className="attack-player-life">{player2Life}</div>
+                <div className="controls">
+                  <button onClick={() => setPlayer2Life((l) => l + 1)}>+</button>
+                  <button onClick={() => setPlayer2Life((l) => l - 1)}>-</button>
+                </div>
+              </div>
             </div>
 
-            <div className="zone" style={{ background: ZONES[zone] }}>
-              {zone} Attack
+            <div className="stat">
+              <div className="stat-label">Speed</div>
+              <div className="stat-value">{attackSpeed}</div>
+              <div className="stat-controls">
+                <button onClick={() => setAttackSpeed((v) => v + 1)}>+</button>
+                <button onClick={() => setAttackSpeed((v) => v - 1)}>-</button>
+              </div>
+            </div>
+
+            <div className="stat">
+              <div className="stat-label">Damage</div>
+              <div className="stat-value">{attackDamage}</div>
+              <div className="stat-controls">
+                <button onClick={() => setAttackDamage((v) => v + 1)}>+</button>
+                <button onClick={() => setAttackDamage((v) => v - 1)}>-</button>
+              </div>
             </div>
 
             <div className="zone-buttons">
-              {Object.keys(ZONES).map((z) => (
-                <button key={z} onClick={() => setZone(z)}>
-                  {z}
-                </button>
-              ))}
-            </div>
-
-            <div className="stat">
-              Speed: {speed}
-              <div>
-                <button onClick={() => setSpeed(speed - 1)}>-</button>
-                <button onClick={() => setSpeed(speed + 1)}>+</button>
-              </div>
-            </div>
-
-            <div className="stat">
-              Damage: {damage}
-              <div>
-                <button onClick={() => setDamage(damage - 1)}>-</button>
-                <button onClick={() => setDamage(damage + 1)}>+</button>
-              </div>
+              <button
+                style={{ background: "#ff4c4c" }}
+                onClick={() => setAttackZone("high")}
+              >
+                High
+              </button>
+              <button
+                style={{ background: "#ffa500" }}
+                onClick={() => setAttackZone("mid")}
+              >
+                Mid
+              </button>
+              <button
+                style={{ background: "#ffec4c" }}
+                onClick={() => setAttackZone("low")}
+              >
+                Low
+              </button>
             </div>
 
             <div className="block-buttons">
-              <button onClick={() => resolveBlock("full")}>Full</button>
-              <button onClick={() => resolveBlock("half")}>Half</button>
-              <button onClick={() => resolveBlock("none")}>Unblocked</button>
+              <button onClick={() => applyAttack("full")}>Full</button>
+              <button onClick={() => applyAttack("half")}>Half</button>
+              <button onClick={() => applyAttack("unblocked")}>Unblocked</button>
             </div>
           </div>
-        </div>
-      )}
-
-      {gameOver && (
-        <div className="game-over">
-          <div>Game Over</div>
-          <button onClick={newGame}>New Game</button>
         </div>
       )}
     </div>
   );
 }
+
+export default App;

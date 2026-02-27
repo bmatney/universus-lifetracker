@@ -14,35 +14,42 @@ body {
 }
 
 button {
-  background: #c45a1a;
   border: none;
-  color: white;
-  padding: 14px 18px;
-  margin: 6px;
-  font-size: 18px;
-  border-radius: 8px;
   cursor: pointer;
+  transition: transform 0.1s ease;
+}
+button:active {
+  transform: scale(0.95);
 }
 
+/* Main container */
 .container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;   /* center everything vertically */
+  justify-content: center; /* main screen centered */
   width: 100%;
   height: 100vh;
+  gap: clamp(40px, 8vh, 80px);
   padding: 20px;
-  gap: clamp(60px, 12vh, 120px);
 }
 
+/* Players */
 .player {
   width: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  transition: transform 0.3s ease;
-  flex-shrink: 1; /* allows shrinking to fit viewport */
+}
+
+.player-rotate {
+  transform: rotate(180deg);
+}
+
+.player-rotate .player-name,
+.player-rotate .life-total,
+.player-rotate .controls {
+  transform: rotate(0deg);
 }
 
 .player-name {
@@ -51,40 +58,72 @@ button {
 }
 
 .life-total {
-  font-size: clamp(40px, 8vh, 70px); /* scales but stays within min/max */
+  font-size: clamp(40px, 8vh, 70px);
   font-weight: bold;
   cursor: pointer;
   margin: 10px 0;
 }
 
+/* Life total buttons */
 .controls {
   display: flex;
+  gap: 6px;
 }
 
+.controls button {
+  background-color: #c45a1a; /* dark orange theme */
+  color: white;               /* readable text */
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-size: 20px;
+  width: 40px;
+  height: 40px;
+  display: flex;              /* use flexbox */
+  align-items: center;        /* vertical center */
+  justify-content: center;    /* horizontal center */
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.2s ease;
+}
+
+.controls button:hover {
+  background-color: #e05a20; /* slightly brighter on hover */
+}
+
+.controls button:active {
+  transform: scale(0.95);
+}
+
+/* Modal / Attack Panel */
 .modal-backdrop {
   position: fixed;
   inset: 0;
+  height: 100dvh;
   background: rgba(11, 28, 45, 0.75);
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: center;       /* center vertically */
+  justify-content: center;   /* center horizontally */
+  padding: 20px;             /* prevent touching edges on small screens */
   z-index: 100;
+  overflow-y: auto;          /* scroll if panel taller than viewport */
 }
 
 .attack-panel {
   background: #122b44;
-  padding: 20px;
+  padding: 16px;
   border-radius: 14px;
-  width: min(90vw, 500px); 
-  height: min(85vh, 700px); 
+  width: min(90vw, 500px);
+  max-height: 85vh;  /* fits most screens */
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   text-align: center;
-  transition: transform 0.3s ease;
+  gap: 8px;
+  transform: none;
+  transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
+/* Rotation classes for attack info */
 .attack-face-up {
   transform: rotate(180deg);
 }
@@ -97,68 +136,98 @@ button {
   display: flex;
   justify-content: space-between;
   width: 100%;
+  margin-bottom: 6px;
 }
 
 .attack-life {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 2px;
 }
 
-.zone {
-  padding: 12px;
-  font-weight: bold;
-  border-radius: 6px;
-  color: black;
-  margin: 12px 0;
-  width: 100%;
-}
-
-.zone-buttons,
-.block-buttons {
-  flex: 1;   /* smaller share */
-  display: flex;
-  justify-content: space-evenly;
-  align-items: center;
-  width: 100%;
-}
-
-.stat {
-  flex: 3;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
-  font-size: clamp(20px, 3vh, 32px);
-  font-weight: 600;
+.attack-player-name {
+  font-size: 18px;
+  opacity: 0.7;
   margin: 0;
 }
 
-.stat button {
-  font-size: 32px;
-  padding: 22px 32px;
-  border-radius: 14px;
-  min-width: 80px;
+.attack-player-life {
+  font-size: clamp(28px, 4vh, 42px);
+  font-weight: bold;
+  margin: 0;
 }
+
+/* Stats */
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.stat-label,
 .stat-value {
   margin: 0;
 }
 
+.stat-label {
+  font-size: clamp(20px, 3vh, 32px);
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: clamp(48px, 7vh, 80px);
+  font-weight: bold;
+}
 
 .stat-controls {
   display: flex;
-  gap: 24px;
-  margin-top: 4px; /* small controlled spacing */
+  gap: 12px;
 }
 
-.game-over {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.85);
+.stat button {
+  font-size: 28px;
+  padding: 18px 26px;
+  border-radius: 12px;
+  min-width: 70px;
+  background-color: #c45a1a; /* dark orange theme */
+  color: white;               /* readable text */
+
+}
+
+/* Zone / Block Buttons */
+.zone-buttons,
+.block-buttons {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  font-size: 32px;
+  justify-content: space-evenly;
+  width: 100%;
+  margin: 6px 0;
+  flex-shrink: 0;
+}
+
+.zone-buttons button {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  color: black;
+}
+
+.zone-buttons button:nth-child(1) { background-color: #ff4c4c; } /* High */
+.zone-buttons button:nth-child(2) { background-color: #ffa500; } /* Mid */
+.zone-buttons button:nth-child(3) { background-color: #ffec4c; } /* Low */
+
+.block-buttons button {
+  background-color: #c45a1a; /* dark orange theme */
+  color: white;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.block-buttons button:active {
+  transform: scale(0.96);
 }
