@@ -18,6 +18,7 @@ button {
   cursor: pointer;
   transition: transform 0.1s ease;
 }
+
 button:active {
   transform: scale(0.95);
 }
@@ -34,7 +35,7 @@ button:active {
   padding: 20px;
 }
 
-/* Players */
+/* Player */
 .player {
   width: 100%;
   display: flex;
@@ -42,10 +43,19 @@ button:active {
   align-items: center;
 }
 
-/* Rotation for attack panel or main screen mirroring */
+/* Rotate player for attack panel */
+.player-rotate {
+  transform: rotate(180deg);
+}
+
 .player-rotate .player-name,
 .player-rotate .life-total,
 .player-rotate .controls {
+  transform: rotate(180deg);
+}
+
+/* Player 2 main screen rotation */
+.player-2-main {
   transform: rotate(180deg);
 }
 
@@ -58,7 +68,6 @@ button:active {
   font-size: clamp(40px, 8vh, 70px);
   font-weight: bold;
   cursor: pointer;
-  margin: 10px 0;
 }
 
 /* Life total buttons */
@@ -68,7 +77,7 @@ button:active {
 }
 
 .controls button {
-  background-color: #c45a1a;
+  background-color: #c45a1a; /* dark orange theme */
   color: white;
   border-radius: 8px;
   border: none;
@@ -79,8 +88,6 @@ button:active {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: transform 0.1s ease, background-color 0.2s ease;
 }
 
 .controls button:hover {
@@ -89,6 +96,21 @@ button:active {
 
 .controls button:active {
   transform: scale(0.95);
+}
+
+/* --- MAIN SCREEN SCALING --- */
+.container.main-screen .player .player-name {
+  font-size: 20px; /* larger names */
+}
+
+.container.main-screen .player .life-total {
+  font-size: clamp(60px, 12vh, 100px); /* bigger life totals */
+}
+
+.container.main-screen .player .controls button {
+  font-size: 28px;
+  width: 50px;
+  height: 50px;
 }
 
 /* Modal / Attack Panel */
@@ -210,9 +232,15 @@ button:active {
   color: black;
 }
 
-.zone-buttons button:nth-child(1) { background-color: #ff4c4c; }
-.zone-buttons button:nth-child(2) { background-color: #ffa500; }
-.zone-buttons button:nth-child(3) { background-color: #ffec4c; }
+.zone-buttons button:nth-child(1) {
+  background-color: #ff4c4c;
+}
+.zone-buttons button:nth-child(2) {
+  background-color: #ffa500;
+}
+.zone-buttons button:nth-child(3) {
+  background-color: #ffec4c;
+}
 
 .block-buttons button {
   background-color: #c45a1a;
@@ -228,27 +256,12 @@ button:active {
   transform: scale(0.96);
 }
 
-/* =============================== */
-/* Main screen scaling (only affects container when no attack panel) */
-.container.main-screen .player {
-  gap: clamp(16px, 3vh, 32px);
-  transform: scale(1.2); /* scale all players */
-}
-
-/* Mirror Player 2 via children rotation */
-.container.main-screen .player.player-rotate .player-name,
-.container.main-screen .player.player-rotate .life-total,
-.container.main-screen .player.player-rotate .controls {
-  transform: rotate(180deg);
-}
-
-/* Scale life totals and buttons on main screen */
-.container.main-screen .life-total {
-  font-size: clamp(50px, 10vh, 90px);
-}
-
-.container.main-screen .controls button {
-  width: 50px;
-  height: 50px;
-  font-size: 24px;
+/* Reset button for Game Over */
+.reset-button {
+  background-color: #c45a1a;
+  color: white;
+  padding: 14px 22px;
+  border-radius: 10px;
+  font-size: 18px;
+  margin-top: 10px;
 }
