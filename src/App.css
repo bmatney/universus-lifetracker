@@ -304,6 +304,7 @@ button:active {
 /* Game Over Panel */
 .game-over-panel {
   text-align: center;
+animation: panelInUp 0.15s forwards; /* Add this so it fades in and becomes visible! */
 }
 
 .reset-button {
