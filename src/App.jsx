@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./App.css";
 
 function App() {
@@ -13,6 +13,10 @@ function App() {
   const [attackDamage, setAttackDamage] = useState(DEFAULT_STAT);
   const [attackZone, setAttackZone] = useState("high");
   const [gameOver, setGameOver] = useState(null);
+
+  // Swipe Gesture Refs
+  const touchStartX = useRef(null);
+  const touchStartY = useRef(null);
 
   // Navigation / Back Gesture Logic
   useEffect(() => {
@@ -32,14 +36,15 @@ function App() {
   const updatePlayerLife = (playerNum, delta) => {
     const setter = playerNum === 1 ? setPlayer1Life : setPlayer2Life;
     setter((prev) => {
-      const newLife = prev + delta;
-      if (newLife <= 0) setGameOver(playerNum === 1 ? 2 : 1);
-      return Math.max(0, newLife);
+      const newLife = Math.max(0, prev + delta);
+      if (newLife === 0) setGameOver(playerNum === 1 ? 2 : 1);
+      return newLife;
     });
   };
 
-  const applyAttack = useCallback((type) => {
+  const applyAttack = (type) => {
     if (targetPlayer === null) return;
+    
     let damage = 0;
     if (type === "half") damage = Math.ceil(attackDamage / 2);
     else if (type === "unblocked") damage = attackDamage;
@@ -49,7 +54,31 @@ function App() {
     setAttackDamage(DEFAULT_STAT);
     setAttackZone("high");
     closePanel();
-  }, [targetPlayer, attackDamage]);
+  };
+
+  // Swipe Handlers
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    
+    const distanceX = touchStartX.current - touchEndX;
+    const distanceY = touchStartY.current - touchEndY;
+    
+    // Check if swipe is mostly horizontal and exceeds 50px threshold
+    if (Math.abs(distanceX) > 50 && Math.abs(distanceX) > Math.abs(distanceY)) {
+      closePanel();
+    }
+    
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
 
   const panelClass = targetPlayer === 1 ? "attack-face-down" : "attack-face-up";
 
@@ -62,7 +91,12 @@ function App() {
       </div>
 
       {targetPlayer && !gameOver && (
-        <div className="modal-backdrop" onClick={closePanel}>
+        <div 
+          className="modal-backdrop" 
+          onClick={closePanel}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
           <div className={`attack-panel ${panelClass}`} onClick={(e) => e.stopPropagation()}>
             <div className="panel-life-display">
                 <MiniLife label="P2" life={player2Life} onUpdate={(d) => updatePlayerLife(2, d)} />
