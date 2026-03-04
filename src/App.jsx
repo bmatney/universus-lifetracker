@@ -42,12 +42,15 @@ function App() {
     });
   };
 
-  const applyAttack = (type) => {
+const applyAttack = (type) => {
     if (targetPlayer === null) return;
     
     let damage = 0;
     if (type === "half") damage = Math.ceil(attackDamage / 2);
     else if (type === "unblocked") damage = attackDamage;
+
+    // PREVENT HEALING: Ensure damage never resolves below 0
+    damage = Math.max(0, damage);
 
     updatePlayerLife(targetPlayer, -damage);
     setAttackSpeed(DEFAULT_STAT);
@@ -164,7 +167,8 @@ const StatControl = ({ label, val, set }) => (
     <div className="stat-label">{label}</div>
     <div className="stat-value">{val}</div>
     <div className="stat-controls">
-      <button onClick={() => set(v => Math.max(0, v - 1))}>-</button>
+      {/* Removed Math.max(0, ...) so stats can go negative! */}
+      <button onClick={() => set(v => v - 1)}>-</button>
       <button onClick={() => set(v => v + 1)}>+</button>
     </div>
   </div>
