@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { KeepAwake } from '@capacitor-community/keep-awake';
 import "./App.css";
 
 function App() {
@@ -16,7 +17,15 @@ function App() {
 
   // State for tracking who goes first
   const [firstPlayer, setFirstPlayer] = useState(null);
-
+  const [isRolling, setIsRolling] = useState(false);
+  const [rollResults, setRollResults] = useState(null);
+  // Keep the screen from going to sleep
+    useEffect(() => {
+      const keepScreenOn = async () => {
+        await KeepAwake.keepAwake();
+      };
+      keepScreenOn();
+    }, []);
   // Swipe Gesture Refs
   const touchStartX = useRef(null);
   const touchStartY = useRef(null);
@@ -86,8 +95,35 @@ function App() {
     touchStartY.current = null;
   };
 
+
   // FLIPPED: The panel now faces the attacking player!
     const panelClass = targetPlayer === 1 ? "attack-face-down" : "attack-face-up";
+
+    const handleRollDice = () => {
+        setIsRolling(true);
+
+        // Quick delay for "rolling" suspense
+        setTimeout(() => {
+          let p1 = Math.floor(Math.random() * 20) + 1;
+          let p2 = Math.floor(Math.random() * 20) + 1;
+
+          // Reroll if there's a tie
+          while (p1 === p2) {
+            p2 = Math.floor(Math.random() * 20) + 1;
+          }
+
+          setRollResults({ p1, p2 });
+          const winner = p1 > p2 ? 1 : 2;
+
+          // Leave the results on screen for 2.5 seconds before starting the game
+          setTimeout(() => {
+            setFirstPlayer(winner);
+            setIsRolling(false);
+            setRollResults(null);
+          }, 2500);
+        }, 600);
+      };
+
   return (
     <div className="container main-screen">
       <div className="game-area">
@@ -122,9 +158,22 @@ function App() {
         >
           <div className={`attack-panel ${panelClass}`} onClick={(e) => e.stopPropagation()}>
             <div className="panel-life-display">
-                <MiniLife label="P2" life={player2Life} onUpdate={(d) => updatePlayerLife(2, d)} />
-                <MiniLife label="P1" life={player1Life} onUpdate={(d) => updatePlayerLife(1, d)} />
-            </div>
+                            {/* P2 gets inverted if P2 is the target */}
+                            <MiniLife
+                              label="P2"
+                              life={player2Life}
+                              onUpdate={(d) => updatePlayerLife(2, d)}
+                              inverted={targetPlayer === 2}
+                            />
+
+                            {/* P1 gets inverted if P1 is the target */}
+                            <MiniLife
+                              label="P1"
+                              life={player1Life}
+                              onUpdate={(d) => updatePlayerLife(1, d)}
+                              inverted={targetPlayer === 1}
+                            />
+                        </div>
 
             <div className="stat-group">
               <StatControl label="Speed" val={attackSpeed} set={setAttackSpeed} />
@@ -149,17 +198,43 @@ function App() {
       )}
 
       {/* First Player Selection Popup */}
-      {!firstPlayer && !gameOver && (
-        <div className="modal-backdrop">
-          <div className="attack-panel game-over-panel">
-            <h2 style={{ margin: "0 0 20px 0" }}>Who goes first?</h2>
-            <div className="block-buttons">
-              <button onClick={() => setFirstPlayer(2)}>Player 2</button>
-              <button onClick={() => setFirstPlayer(1)}>Player 1</button>
-            </div>
-          </div>
-        </div>
-      )}
+            {!firstPlayer && !gameOver && (
+              <div className="modal-backdrop">
+                <div className="attack-panel game-over-panel">
+                  <h2 style={{ margin: "0 0 20px 0" }}>Who goes first?</h2>
+
+                  {isRolling ? (
+                    <div className="roll-display">
+                      {rollResults ? (
+                        <>
+                          <div className="dice-results">
+                            <div className="dice-score">
+                              <span>P2</span>
+                              <strong>{rollResults.p2}</strong>
+                            </div>
+                            <div className="dice-score">
+                              <span>P1</span>
+                              <strong>{rollResults.p1}</strong>
+                            </div>
+                          </div>
+                          <h3 className="roll-winner">Player {rollResults.p1 > rollResults.p2 ? 1 : 2} goes first!</h3>
+                        </>
+                      ) : (
+                        <h3 style={{ opacity: 0.7 }}>Rolling d20s...</h3>
+                      )}
+                    </div>
+                  ) : (
+                    <>
+                      <div className="block-buttons" style={{ marginBottom: "16px" }}>
+                        <button onClick={() => setFirstPlayer(2)}>Player 2</button>
+                        <button onClick={() => setFirstPlayer(1)}>Player 1</button>
+                      </div>
+                      <button className="roll-button" onClick={handleRollDice}>🎲 Roll d20s</button>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
 
       {/* Game Over Modal */}
       {gameOver && (
@@ -187,8 +262,9 @@ const PlayerSection = ({ num, life, onUpdate, onOpen, rotated, isFirst }) => (
   </div>
 );
 
-const MiniLife = ({ label, life, onUpdate }) => (
-  <div className="mini-life">
+const MiniLife = ({ label, life, onUpdate, inverted }) => (
+  // We dynamically add the inverted class here
+  <div className={`mini-life ${inverted ? "mini-life-inverted" : ""}`}>
     <span className="mini-label">{label} LIFE</span>
     <div className="mini-life-val">{life}</div>
     <div className="mini-controls">
@@ -197,7 +273,6 @@ const MiniLife = ({ label, life, onUpdate }) => (
     </div>
   </div>
 );
-
 const StatControl = ({ label, val, set }) => (
   <div className="stat">
     <div className="stat-label">{label}</div>

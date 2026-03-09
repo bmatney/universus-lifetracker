@@ -286,6 +286,7 @@ button:active {
   justify-content: space-between;
   gap: 10px;
   width: 100%;
+  margin: 20px 0;
 }
 
 .zone-buttons button {
@@ -343,4 +344,55 @@ button:active {
   font-size: 20px;
   font-weight: bold;
   margin-top: 10px;
+}
+/* Flips the defending player's mini-life toward their side of the table */
+.mini-life-inverted {
+  transform: rotate(180deg);
+}
+/* Dice Roll Styles */
+.roll-button {
+  background-color: #34495e;
+  color: white;
+  width: 100%;
+  padding: 14px 0;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+.roll-button:hover {
+  background-color: #415b76;
+}
+
+.dice-results {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 16px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+}
+
+.dice-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.dice-score span {
+  font-size: 14px;
+  opacity: 0.6;
+}
+
+.dice-score strong {
+  font-size: 36px;
+  color: #c45a1a;
+}
+
+.roll-winner {
+  color: #f4f4f4;
+  margin: 0;
+  animation: panelInUp 0.3s ease;
 }
