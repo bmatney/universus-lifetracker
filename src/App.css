@@ -3,13 +3,26 @@
    ========================================= */
 * {
   box-sizing: border-box;
-  /* Draws the outline on the OUTSIDE of the text */
+}
+
+h2, 
+.player-name, 
+.life-total, 
+.mini-life-val, 
+.mini-label,
+.stat-value, 
+.stat-label,
+.dice-score strong, 
+.roll-winner,
+.block-buttons,
+button {
   text-shadow:
     -1px -1px 0 #000,
      1px -1px 0 #000,
     -1px  1px 0 #000,
      1px  1px 0 #000;
 }
+
 
 body {
   margin: 0;
@@ -36,19 +49,22 @@ button:active {
   transform: scale(0.95);
 }
 
-/* Base style for all action buttons (Controls, Block, Stats, Roll) */
 .controls button,
 .mini-controls button,
 .stat-controls button,
 .block-buttons button,
 .roll-button {
-  border: 2px solid black;
-  box-shadow: 2px 2px 0px black; /* 3D drop-shadow */
+border: 2px solid black;
+  box-shadow: 2px 2px 0px black;
+  font-family: inherit;
+  font-weight: bold;
+  font-size: 16px;
+  color: #f4f4f4;
+  text-transform: uppercase;
+  letter-spacing: 1px;
   display: flex;
-  align-items: center;
   justify-content: center;
-  font-weight: 600;
-  color: white;
+  align-items: center;
 }
 
 /* =========================================
@@ -71,12 +87,19 @@ button:active {
   align-items: center;
   gap: clamp(20px, 5vh, 50px);
   width: 100%;
+  position: relative;
+  z-index: 10; 
 }
 
 .center-divider {
-  height: 1px;
-  width: 60%;
-  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 20px;
+  position: relative;
+  z-index: 15;
+  background: transparent;
 }
 
 /* =========================================
@@ -129,7 +152,6 @@ button:active {
   background-color: #e05a20;
 }
 
-/* Main screen scaling */
 .main-screen .player .player-name,
 .main-screen .player .life-total,
 .main-screen .player .controls {
@@ -187,7 +209,6 @@ button:active {
   transition: background-color 0.3s ease-in-out;
 }
 
-/* Animations */
 @keyframes panelInUp {
   from { opacity: 0; transform: scale(0.95) rotate(0deg); }
   to { opacity: 1; transform: scale(1) rotate(0deg); }
@@ -203,7 +224,6 @@ button:active {
 /* =========================================
    6. ATTACK PANEL CONTENT
    ========================================= */
-/* Mini Life Displays */
 .panel-life-display {
   display: flex;
   flex-direction: row;
@@ -252,7 +272,6 @@ button:active {
   height: 38px;
 }
 
-/* Stat Controls */
 .stat-group {
   display: flex;
   flex-direction: row;
@@ -295,7 +314,6 @@ button:active {
   height: 44px;
 }
 
-/* Zone Buttons */
 .zone-buttons {
   display: flex;
   justify-content: space-between;
@@ -315,9 +333,20 @@ button:active {
   border: 2px solid transparent;
 }
 
-.zone-buttons button[data-zone="high"] { background-color: #ff4c4c; color: white;}
-.zone-buttons button[data-zone="mid"] { background-color: #ffa500; color: white;}
-.zone-buttons button[data-zone="low"] { background-color: #ffec4c; color: white;}
+/* Update these 3 lines in your App.css */
+.zone-buttons button[data-zone="high"] { 
+  background-color: #ED1C24; /* Official UVS High Red */
+  color: #f4f4f4; 
+}
+.zone-buttons button[data-zone="mid"] { 
+  background-color: #F7941D; /* Official UVS Mid Orange */
+  color: #f4f4f4; 
+}
+.zone-buttons button[data-zone="low"] { 
+  background-color: #FFDE00; /* Official UVS Low Yellow */
+  color: #000000; /* Black text for contrast */
+  text-shadow: none; /* Removes the black outline so the dark text stays clean */
+}
 
 .zone-buttons button.selected-zone {
   opacity: 1;
@@ -327,7 +356,6 @@ button:active {
   filter: brightness(1.2);
 }
 
-/* Block Buttons */
 .block-buttons {
   display: flex;
   justify-content: space-between;
@@ -409,21 +437,13 @@ button:active {
   margin: 0;
   animation: panelInUp 0.3s ease;
 }
-/* Center Divider - Now transparent */
-.center-divider {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 20px; /* Reduced height to keep the players close */
-  position: relative;
-  z-index: 5;
-  background: transparent; /* Ensures it blends with the screen */
-}
 
-/* Reset Button - Now Orange with better centering */
-.divider-reset-btn {
-  background: #c45a1a; /* Matching the Game Over reset orange */
+/* =========================================
+   8. CENTER BUTTONS & WATERMARK
+   ========================================= */
+.divider-reset-btn,
+.divider-undo-btn {
+  background: #c45a1a;
   color: #f4f4f4;
   border-radius: 10px;
   width: 65px;
@@ -439,8 +459,27 @@ button:active {
   margin: 0;
 }
 
-.divider-reset-btn:active {
-  background: #ED1C24; /* Changes to red when pressed */
+.divider-reset-btn:active,
+.divider-undo-btn:active:not(:disabled) {
+  background: #ED1C24;
   transform: scale(0.92);
   box-shadow: 1px 1px 0px black;
+}
+
+.divider-undo-btn:disabled {
+  cursor: not-allowed;
+  transform: none;
+}
+
+.background-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 70%;
+  max-width: 400px;
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 1;
+  filter: grayscale(100%);
 }

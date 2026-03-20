@@ -1,5 +1,5 @@
 {
-  "name": "unversus-lifetracker",
+  "name": "universus-lifetracker",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -17,10 +17,12 @@
     "@capacitor/core": "^8.0.2",
     "@capacitor/haptics": "^8.0.1",
     "@capacitor/ios": "^8.0.2",
+    "@capacitor/splash-screen": "^8.0.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@eslint/js": "^9.39.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
