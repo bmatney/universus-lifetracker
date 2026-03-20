@@ -1,0 +1,4 @@
+<resources>
+    <color name="background">#0b1c2d</color>
+    <color name="windowBackground">@color/background</color>
+</resources>

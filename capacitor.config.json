@@ -1,6 +1,6 @@
 {
-  "appId": "com.example.app",
-  "appName": "Universus Lifetracker",
+  "appId": "com.bamsax.Momentum",
+  "appName": "Momentum",
   "webDir": "dist",
   "plugins": {
     "SplashScreen": {

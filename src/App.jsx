@@ -188,7 +188,7 @@ const rollDice = () => {
 
   return (
     <div className="container main-screen">
-      <img src={logo} alt="Universus Logo" className="background-watermark" />
+      <img src={logo} alt="Momentum Logo" className="background-watermark" />
 
       <div className="game-area">
         <PlayerSection
@@ -227,13 +227,14 @@ const rollDice = () => {
             {diceRolls ? (
               <>
                 <div className="dice-results">
-                  <div className="dice-score">
-                    <span>P2 Roll</span>
-                    <strong>{diceRolls.p2}</strong>
-                  </div>
+                  {/* Player 1 is now on the left for the Player 1 facing screen */}
                   <div className="dice-score">
                     <span>P1 Roll</span>
                     <strong>{diceRolls.p1}</strong>
+                  </div>
+                  <div className="dice-score">
+                    <span>P2 Roll</span>
+                    <strong>{diceRolls.p2}</strong>
                   </div>
                 </div>
                 <h3 className="roll-winner" style={{ marginBottom: "20px" }}>
@@ -253,8 +254,8 @@ const rollDice = () => {
               /* Otherwise, show the buttons to roll or pick manually */
               <>
                 <div className="block-buttons" style={{ marginBottom: "16px" }}>
-                  <button onClick={() => setFirstPlayer(2)}>Player 2</button>
                   <button onClick={() => setFirstPlayer(1)}>Player 1</button>
+                  <button onClick={() => setFirstPlayer(2)}>Player 2</button>
                 </div>
                 <button className="roll-button" onClick={rollDice}>🎲 ROLL D20s</button>
               </>
@@ -272,11 +273,22 @@ const rollDice = () => {
             onClick={e => e.stopPropagation()}
             style={{ backgroundColor: zoneColors[attackZone] }}
           >
-            <div className="panel-life-display">
-              {/* FIXED 2: Restored the correct individual inversions so both players can read their own life */}
-              <MiniLife label="P1" life={player1Life} onUpdate={(d) => updatePlayerLife(1, d)} inverted={targetPlayer === 1} />
-              <MiniLife label="P2" life={player2Life} onUpdate={(d) => updatePlayerLife(2, d)} inverted={targetPlayer === 2} />
-            </div>
+          <div className="panel-life-display">
+            {/* Logic: If targetPlayer is 1, the panel is flipped to face P2. 
+                In that case, P2 should be on the left. 
+                Otherwise, P1 is on the left. */}
+            {targetPlayer === 1 ? (
+              <>
+                <MiniLife label="P2" life={player2Life} onUpdate={(d) => updatePlayerLife(2, d)} inverted={false} />
+                <MiniLife label="P1" life={player1Life} onUpdate={(d) => updatePlayerLife(1, d)} inverted={true} />
+              </>
+            ) : (
+              <>
+                <MiniLife label="P1" life={player1Life} onUpdate={(d) => updatePlayerLife(1, d)} inverted={false} />
+                <MiniLife label="P2" life={player2Life} onUpdate={(d) => updatePlayerLife(2, d)} inverted={true} />
+              </>
+            )}
+          </div>
 
             <div className="stat-group">
               <StatControl label="Speed" val={attackSpeed} set={setAttackSpeed} />
@@ -297,9 +309,9 @@ const rollDice = () => {
             </div>
 
             <div className="block-buttons">
-              <button onClick={() => applyDamage(attackDamage)}>UNBLOCKED</button>
-              <button onClick={() => applyDamage(Math.ceil(attackDamage / 2))}>HALF BLOCK</button>
-              <button onClick={() => applyDamage(0)}>FULL BLOCK</button>
+              <button onClick={() => applyDamage(attackDamage)}>No Block</button>
+              <button onClick={() => applyDamage(Math.ceil(attackDamage / 2))}>Half Block</button>
+              <button onClick={() => applyDamage(0)}>Full Block</button>
             </div>
           </div>
         </div>

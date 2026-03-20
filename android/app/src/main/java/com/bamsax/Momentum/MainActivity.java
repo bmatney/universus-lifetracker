@@ -1,4 +1,4 @@
-package com.example.app;
+package com.bamsax.Momentum;
 
 import com.getcapacitor.BridgeActivity;
 
