@@ -2,13 +2,15 @@
   "appId": "com.bamsax.Momentum",
   "appName": "Momentum",
   "webDir": "dist",
+  "ios": {
+    "allowsBackForwardNavigationGestures": true
+  },
   "plugins": {
     "SplashScreen": {
-      "launchShowDuration": 2000,
+      "launchShowDuration": 3000,
       "launchAutoHide": false,
-      "backgroundColor": "#0b1c2d", 
-      "androidSplashResourceName": "splash",
-      "androidScaleType": "CENTER",
+      "backgroundColor": "#0b1c2d",
+      "androidScaleType": "CENTER_CROP",
       "showSpinner": false
     }
   }
