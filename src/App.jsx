@@ -4,6 +4,7 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { App as CapApp } from '@capacitor/app';
 import logo from './assets/logo.png';
+import { ScreenOrientation } from '@capacitor/screen-orientation';
 import "./App.css";
 
 // =========================================
@@ -99,27 +100,34 @@ function App() {
   }, []);
 
   // --- Lifecycle: Device Init ---
-  useEffect(() => {
-    const initApp = async () => {
-      // 1. Try Keep Awake safely
-      try {
-        await KeepAwake.keepAwake();
-      } catch (e) {
-        console.warn("KeepAwake not available:", e);
-      }
-
-      // 2. Always guarantee the Splash Screen hides
-      setTimeout(async () => {
+    useEffect(() => {
+      const initApp = async () => {
+        // 1. Try Keep Awake safely
         try {
-          await SplashScreen.hide();
+          await KeepAwake.keepAwake();
         } catch (e) {
-          console.warn("SplashScreen hide failed:", e);
+          console.warn("KeepAwake not available:", e);
         }
-      }, 2000);
-    };
 
-    initApp();
-  }, []);
+        // 2. Lock Screen to Portrait
+        try {
+          await ScreenOrientation.lock({ orientation: 'portrait' });
+        } catch (e) {
+          console.warn("ScreenOrientation not available or not supported on web:", e);
+        }
+
+        // 3. Always guarantee the Splash Screen hides
+        setTimeout(async () => {
+          try {
+            await SplashScreen.hide();
+          } catch (e) {
+            console.warn("SplashScreen hide failed:", e);
+          }
+        }, 2000);
+      };
+
+      initApp();
+    }, []);
 
   // --- Lifecycle: Back Button Handling ---
   useEffect(() => {
@@ -351,7 +359,7 @@ function App() {
               </>
             ) : (
               <>
-                <div className="stat-label">Starting Life</div>
+                <div className="setup-title">Starting Life</div>
                 <div className="dice-results">
                   <div className="dice-score">
                     <span>P1 Total</span>
@@ -370,7 +378,7 @@ function App() {
                     </div>
                   </div>
                 </div>
-                <div className="stat-label">Who Goes First?</div>
+                <div className="setup-title">Who Goes First?</div>
                 <div className="block-buttons">
                   <button onClick={() => setFirstPlayer(1)}>Player 1</button>
                   <button onClick={() => setFirstPlayer(2)}>Player 2</button>
@@ -393,7 +401,6 @@ function App() {
           <div
             className={`attack-panel ${targetPlayer === 1 ? "attack-face-down" : "attack-face-up"}`}
             onClick={e => e.stopPropagation()}
-            style={{ backgroundColor: zoneColors[attackZone] }}
           >
             <div className="panel-life-display">
               {targetPlayer === 1 ? (

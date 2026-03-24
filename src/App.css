@@ -1,27 +1,30 @@
 /* =========================================
-   0. CSS VARIABLES (THEME & SETTINGS)
+   0. CSS VARIABLES (UVS THEME)
    ========================================= */
 :root {
-  /* Colors */
-  --bg-color: #0b1c2d;
-  --panel-bg: #122b44;
-  --accent-color: #c45a1a;
-  --text-light: #f4f4f4;
-  --text-dark: #000000;
+  /* Core Colors */
+  --bg-dark: #07090f;
+  --panel-bg: rgba(15, 20, 30, 0.95);
+  --uvs-orange: #ff5500;
+  --uvs-blue: #00d2ff;
+  --text-main: #f0f4f8;
+  --text-dim: #8b949e;
 
-  /* Zones */
-  --zone-high: #ED1C24;
-  --zone-mid: #F7941D;
-  --zone-low: #FFDE00;
+  /* Attack Zones (Classic UVS Colors) */
+  --zone-high: #ff2a2a;
+  --zone-mid: #ff8800;
+  --zone-low: #ffd500;
 
-  /* Shadows */
-  --btn-shadow: 2px 2px 0px var(--text-dark);
-  --text-shadow-hard: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-  --text-shadow-heavy: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+  /* Tech UI Borders & Glows */
+  --border-tech: 2px solid #2a3441;
+  --border-active: 2px solid var(--uvs-orange);
+  --glow-orange: 0 0 15px rgba(255, 85, 0, 0.5);
+  --glow-blue: 0 0 15px rgba(0, 210, 255, 0.4);
+  --text-shadow-neon: 0 0 8px rgba(255, 255, 255, 0.4);
 }
 
 /* =========================================
-   1. GLOBAL & CORE STYLES
+   1. GLOBAL & BACKGROUND
    ========================================= */
 * {
   box-sizing: border-box;
@@ -29,9 +32,17 @@
 
 body {
   margin: 0;
-  background: var(--bg-color);
-  color: var(--text-light);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Deep space background with a subtle tech grid */
+  background-color: var(--bg-dark);
+  background-image:
+    linear-gradient(rgba(0, 210, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 210, 255, 0.03) 1px, transparent 1px);
+  background-size: 30px 30px;
+  background-position: center;
+
+  color: var(--text-main);
+  /* Using a system font, but forcing a dynamic, aggressive sans-serif look */
+  font-family: "Impact", "Arial Black", system-ui, sans-serif;
   height: 100vh;
   display: flex;
   align-items: center;
@@ -39,35 +50,31 @@ body {
   overflow: hidden;
 }
 
-/* Prevent iOS system swipe-to-back when modals are open */
 body.modal-open {
   overscroll-behavior-x: none;
   position: fixed;
   width: 100%;
 }
 
-/* Global Text Shadows for readability */
-h2, .player-name, .life-total, .mini-life-val, .mini-label,
-.stat-value, .stat-label, .dice-score strong, .roll-winner, button {
-  text-shadow: var(--text-shadow-hard);
-}
-
 /* =========================================
-   2. BUTTON BASICS
+   2. BUTTON OVERHAUL (SHARP & TACTILE)
    ========================================= */
 button {
-  border: 2px solid var(--text-dark);
   cursor: pointer;
-  transition: transform 0.1s ease, background-color 0.2s ease, opacity 0.2s ease;
-  box-shadow: var(--btn-shadow);
   font-family: inherit;
-  font-weight: bold;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-main);
+  background: #1a2332;
+  border: var(--border-tech);
+  /* Sharp corners instead of rounded */
+  border-radius: 4px;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   justify-content: center;
   align-items: center;
-  color: var(--text-light);
 
-  /* Mobile resets */
   -webkit-tap-highlight-color: transparent;
   -webkit-appearance: none;
   appearance: none;
@@ -80,22 +87,29 @@ button svg {
 }
 
 button:active {
-  transform: scale(0.95);
+  transform: scale(0.92);
+  border-color: var(--uvs-orange);
+  box-shadow: var(--glow-orange);
 }
 
-/* Base style for all +/- adjustment buttons */
+/* Base style for +/- buttons */
 .controls button,
 .mini-controls button,
 .stat-controls button {
-  background-color: var(--accent-color);
-  border-radius: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  background: linear-gradient(135deg, #1f2937, #111827);
+  color: var(--uvs-orange);
+  /* Skewed buttons for that dynamic Momentum feel */
+  transform: skewX(-10deg);
+}
+
+/* Un-skew the text inside the button */
+.controls button span,
+.stat-controls button span {
+  transform: skewX(10deg);
 }
 
 /* =========================================
-   3. MAIN GAME SCREEN LAYOUT
+   3. MAIN GAME SCREEN
    ========================================= */
 .container {
   display: flex;
@@ -112,7 +126,7 @@ button:active {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: clamp(20px, 5vh, 50px);
+  gap: clamp(15px, 4vh, 40px);
   width: 100%;
   position: relative;
   z-index: 10;
@@ -123,14 +137,15 @@ button:active {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 70%;
+  width: 80%;
   opacity: 0.1;
   pointer-events: none;
   z-index: 1;
+  filter: drop-shadow(0 0 20px var(--uvs-blue));
 }
 
 /* =========================================
-   4. PLAYER SECTIONS (MAIN VIEW)
+   4. PLAYER SECTIONS
    ========================================= */
 .player {
   width: 100%;
@@ -144,48 +159,42 @@ button:active {
   transform: rotate(180deg);
 }
 
-/* Scaling for Main Screen UI */
-.main-screen .player .player-name,
-.main-screen .player .life-total,
-.main-screen .player .controls {
-  transform: scale(1.1);
+.player-name {
+  font-size: 1.2rem;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+.first-name-active {
+  color: var(--uvs-blue);
+  text-shadow: var(--glow-blue);
 }
 
 .life-total {
-  font-size: clamp(80px, 15vh, 120px);
-  font-weight: 900;
-  margin: 15px 0;
+  font-size: clamp(90px, 16vh, 140px);
+  font-style: italic;
+  margin: 5px 0;
   line-height: 1;
-  text-shadow: var(--text-shadow-heavy);
+  color: #ffffff;
+  /* Heavy multi-layered shadow to punch it out from the background */
+  text-shadow:
+    3px 3px 0 #000,
+    -1px -1px 0 #000,
+    0 0 20px rgba(255, 255, 255, 0.2);
 }
 
 .controls {
   display: flex;
   flex-direction: row;
-  gap: 16px;
+  gap: 20px;
 }
 
 .controls button {
-  width: 54px;
-  height: 54px;
-  font-size: 28px;
-}
-
-/* First Player Glow Animation */
-.first-name-active {
-  color: var(--text-light);
-  font-weight: 900;
-  animation: playerGlow 2s infinite alternate;
-}
-
-@keyframes playerGlow {
-  from {
-    text-shadow: 0 0 5px #fff, 0 0 10px var(--accent-color), var(--text-shadow-hard);
-  }
-  to {
-    text-shadow: 0 0 15px #fff, 0 0 25px var(--accent-color), var(--text-shadow-hard);
-    transform: scale(1.05);
-  }
+  width: 60px;
+  height: 50px;
+  font-size: 32px;
+  border-bottom: 4px solid #000; /* 3D tactile edge */
 }
 
 /* =========================================
@@ -193,35 +202,34 @@ button:active {
    ========================================= */
 .divider-reset-btn,
 .divider-undo-btn {
-  background: var(--accent-color);
-  width: 80px;
-  height: 48px;
-  border-radius: 12px;
+  background: #111827;
+  color: var(--text-dim);
+  border: var(--border-tech);
+  width: 70px;
+  height: 40px;
 }
 
-.divider-reset-btn svg,
-.divider-undo-btn svg {
-  width: 28px;
-  height: 28px;
+.divider-reset-btn:active,
+.divider-undo-btn:active {
+  color: var(--uvs-orange);
 }
 
 .divider-undo-btn:disabled {
-  opacity: 0.4;
-  filter: grayscale(0.6);
+  opacity: 0.2;
   box-shadow: none;
   cursor: not-allowed;
-  transform: none;
+  border-color: transparent;
 }
 
 /* =========================================
-   6. MODALS & PANELS
+   6. MODALS & ATTACK PANELS
    ========================================= */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(11, 28, 45, 0.7);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(4, 6, 10, 0.85);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -231,16 +239,20 @@ button:active {
 .attack-panel {
   background: var(--panel-bg);
   padding: 24px;
-  border-radius: 20px;
-  width: min(90vw, 450px);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 4px solid var(--uvs-orange);
+  width: min(92vw, 450px);
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+  gap: 24px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.8), var(--glow-orange);
 }
 
 .attack-face-down {
   transform: rotate(180deg);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 4px solid var(--uvs-orange);
 }
 
 /* =========================================
@@ -250,7 +262,7 @@ button:active {
   display: flex;
   justify-content: space-around;
   padding-bottom: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 2px dashed #2a3441;
 }
 
 .mini-life {
@@ -258,20 +270,25 @@ button:active {
   flex-direction: column;
   align-items: center;
   flex: 1;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 12px;
-  margin: 0 5px;
+  padding: 8px;
 }
 
 .mini-life-inverted {
   transform: rotate(180deg);
 }
 
+.mini-label {
+  font-family: system-ui, sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+}
+
 .mini-life-val {
-  font-size: 2.2rem;
-  font-weight: 900;
-  margin: 8px 0;
+  font-size: 2.5rem;
+  font-style: italic;
+  margin: 4px 0 12px 0;
+  text-shadow: 2px 2px 0 #000;
 }
 
 .stat-group {
@@ -288,30 +305,33 @@ button:active {
 }
 
 .stat-value {
-  font-size: clamp(40px, 8vh, 60px);
-  font-weight: bold;
-  margin-bottom: 8px;
+  font-size: clamp(45px, 8vh, 65px);
+  font-style: italic;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 0 #000;
+  color: var(--uvs-orange);
 }
 
 .stat-label {
-  text-transform: uppercase;
+  letter-spacing: 3px;
   font-size: 14px;
-  opacity: 0.8;
-  margin-bottom: 4px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
 }
 
 .mini-controls,
 .stat-controls {
   display: flex;
   flex-direction: row;
-  gap: 12px;
+  gap: 10px;
 }
 
 .mini-controls button,
 .stat-controls button {
-  width: 44px;
-  height: 44px;
-  font-size: 22px;
+  width: 48px;
+  height: 40px;
+  font-size: 24px;
+  border-bottom: 3px solid #000;
 }
 
 /* =========================================
@@ -325,37 +345,56 @@ button:active {
 
 .zone-buttons button {
   flex: 1;
-  padding: 14px 0;
-  border-radius: 10px;
-  opacity: 0.6;
+  padding: 16px 0;
+  font-style: italic;
+  font-size: 1.1rem;
+  background: #111827;
+  border: 2px solid #2a3441;
+  opacity: 0.5;
 }
 
-.zone-buttons button[data-zone="high"] { background-color: var(--zone-high); }
-.zone-buttons button[data-zone="mid"] { background-color: var(--zone-mid); }
-.zone-buttons button[data-zone="low"] {
-  background-color: var(--zone-low);
-  color: var(--text-dark);
-  text-shadow: none;
-}
+.zone-buttons button[data-zone="high"] { color: var(--zone-high); }
+.zone-buttons button[data-zone="mid"] { color: var(--zone-mid); }
+.zone-buttons button[data-zone="low"] { color: var(--zone-low); }
 
 .zone-buttons button.selected-zone {
   opacity: 1;
-  border: 2px solid var(--text-light);
-  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Dynamic Borders based on Selected Zone */
+.zone-buttons button.selected-zone[data-zone="high"] {
+  border-color: var(--zone-high);
+  box-shadow: 0 0 15px rgba(255, 42, 42, 0.3);
+}
+.zone-buttons button.selected-zone[data-zone="mid"] {
+  border-color: var(--zone-mid);
+  box-shadow: 0 0 15px rgba(255, 136, 0, 0.3);
+}
+.zone-buttons button.selected-zone[data-zone="low"] {
+  border-color: var(--zone-low);
+  box-shadow: 0 0 15px rgba(255, 213, 0, 0.3);
 }
 
 .block-buttons {
   display: flex;
-  gap: 12px;
+  gap: 8px;
 }
 
 .block-buttons button {
   flex: 1;
-  background-color: var(--accent-color);
-  padding: 16px 10px;
-  border-radius: 10px;
-  text-transform: uppercase;
-  font-size: 0.9rem;
+  background: var(--uvs-orange);
+  color: #fff;
+  border: none;
+  padding: 18px 8px;
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+  border-bottom: 4px solid #b33c00;
+}
+
+.block-buttons button:active {
+  border-bottom-width: 0px;
+  transform: translateY(4px);
 }
 
 /* =========================================
@@ -364,32 +403,48 @@ button:active {
 .dice-results {
   display: flex;
   justify-content: space-around;
-  padding: 20px 10px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 24px 10px;
+  background: #0d1117;
+  border-radius: 4px;
+  border: var(--border-tech);
 }
 
 .dice-score {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+}
+
+.dice-score span {
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  font-size: 0.9rem;
 }
 
 .dice-score strong {
-  font-size: 2.8rem;
+  font-size: 3.5rem;
+  font-style: italic;
+  color: var(--uvs-blue);
+  text-shadow: var(--glow-blue);
 }
 
 .roll-button,
 .reset-button {
-  background-color: var(--accent-color);
-  border-radius: 12px;
-  padding: 18px;
-  text-transform: uppercase;
-  width: 100%;
-  font-size: 1.1rem;
-  letter-spacing: 1px;
+  background: var(--uvs-blue);
+  color: #000;
+  padding: 20px;
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+  border: none;
+  border-bottom: 4px solid #008ba8;
+}
+
+.roll-button:active,
+.reset-button:active {
+  border-bottom-width: 0px;
+  transform: translateY(4px);
+  background: #00e5ff;
 }
 
 .game-over-panel {
@@ -397,5 +452,25 @@ button:active {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 30px 20px;
+  padding: 40px 20px;
+  border-top: 4px solid var(--uvs-blue);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.8), var(--glow-blue);
+}
+
+.game-over-panel h2 {
+  font-size: 2.5rem;
+  font-style: italic;
+  color: var(--text-main);
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+}
+
+.setup-title {
+  letter-spacing: 3px;
+  font-size: 1.2rem;
+  color: var(--text-main);
+  margin-bottom: 10px;
+  text-align: center;
+  font-style: italic;
+  text-transform: uppercase;
 }
