@@ -1,10 +1,14 @@
 import { useState, useEffect, useCallback, memo } from "react";
+
+// Capacitor Imports
 import { KeepAwake } from '@capacitor-community/keep-awake';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { App as CapApp } from '@capacitor/app';
-import logo from './assets/logo.png';
 import { ScreenOrientation } from '@capacitor/screen-orientation';
+
+// Assets & Styles
+import logo from './assets/logo.png';
 import "./App.css";
 
 // =========================================
@@ -15,24 +19,22 @@ const ZONES = { HIGH: "high", MID: "mid", LOW: "low" };
 
 const zoneColors = {
   [ZONES.HIGH]: "#ED1C24",
-  [ZONES.MID]: "#F7941D",
-  [ZONES.LOW]: "#FFDE00",
-  default: "#2c3e50"
+  [ZONES.MID]:  "#F7941D",
+  [ZONES.LOW]:  "#FFDE00",
+  default:      "#2c3e50"
 };
 
 // =========================================
 // 2. MEMOIZED SUB-COMPONENTS
 // =========================================
-
 const PlayerSection = memo(({ num, life, onUpdate, onOpen, rotated, isFirst }) => (
-  <div
-    className={`player ${rotated ? "player-rotate" : ""}`}
-    onClick={onOpen}
-  >
+  <div className={`player ${rotated ? "player-rotate" : ""}`} onClick={onOpen}>
     <div className={`player-name ${isFirst ? "first-name-active" : ""}`}>
       PLAYER {num}
     </div>
+
     <div className="life-total">{life}</div>
+
     <div className="controls">
       <button onClick={(e) => { e.stopPropagation(); onUpdate(num, -1); }}>-</button>
       <button onClick={(e) => { e.stopPropagation(); onUpdate(num, 1); }}>+</button>
@@ -65,26 +67,26 @@ const StatControl = memo(({ label, val, set }) => (
 // =========================================
 // 3. MAIN APPLICATION COMPONENT
 // =========================================
-
 function App() {
+
   // --- State: Game Stats ---
-  const [baseLifeP1, setBaseLifeP1] = useState(25);
-  const [baseLifeP2, setBaseLifeP2] = useState(25);
+  const [baseLifeP1, setBaseLifeP1]   = useState(25);
+  const [baseLifeP2, setBaseLifeP2]   = useState(25);
   const [player1Life, setPlayer1Life] = useState(25);
   const [player2Life, setPlayer2Life] = useState(25);
 
   // --- State: Attack Panel ---
   const [targetPlayer, setTargetPlayer] = useState(null);
-  const [attackSpeed, setAttackSpeed] = useState(DEFAULT_STAT);
+  const [attackSpeed, setAttackSpeed]   = useState(DEFAULT_STAT);
   const [attackDamage, setAttackDamage] = useState(DEFAULT_STAT);
-  const [attackZone, setAttackZone] = useState(ZONES.HIGH);
+  const [attackZone, setAttackZone]     = useState(ZONES.HIGH);
 
   // --- State: UI & Flow ---
-  const [gameOver, setGameOver] = useState(null);
+  const [gameOver, setGameOver]                 = useState(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
-  const [firstPlayer, setFirstPlayer] = useState(null);
-  const [diceRolls, setDiceRolls] = useState(null);
-  const [history, setHistory] = useState([]);
+  const [firstPlayer, setFirstPlayer]           = useState(null);
+  const [diceRolls, setDiceRolls]               = useState(null);
+  const [history, setHistory]                   = useState([]);
 
   // --- State: Touch Gestures ---
   const [touchStartX, setTouchStartX] = useState(null);
@@ -95,43 +97,30 @@ function App() {
     try {
       await Haptics.impact({ style });
     } catch (e) {
-      // Silently fail on web
+      // Silently fail on web environments
     }
   }, []);
 
-  // --- Lifecycle: Device Init ---
-    useEffect(() => {
-      const initApp = async () => {
-        // 1. Try Keep Awake safely
-        try {
-          await KeepAwake.keepAwake();
-        } catch (e) {
-          console.warn("KeepAwake not available:", e);
-        }
-
-        // 2. Lock Screen to Portrait
-        try {
-          await ScreenOrientation.lock({ orientation: 'portrait' });
-        } catch (e) {
-          console.warn("ScreenOrientation not available or not supported on web:", e);
-        }
-
-        // 3. Always guarantee the Splash Screen hides
-        setTimeout(async () => {
-          try {
-            await SplashScreen.hide();
-          } catch (e) {
-            console.warn("SplashScreen hide failed:", e);
-          }
-        }, 2000);
-      };
-
-      initApp();
-    }, []);
-
-  // --- Lifecycle: Back Button Handling ---
+  // --- Lifecycle: Device Initialization ---
   useEffect(() => {
-    // 1. Android Native Back Button
+    const initApp = async () => {
+      try { await KeepAwake.keepAwake(); }
+      catch (e) { console.warn("KeepAwake not available:", e); }
+
+      try { await ScreenOrientation.lock({ orientation: 'portrait' }); }
+      catch (e) { console.warn("ScreenOrientation not available:", e); }
+
+      setTimeout(async () => {
+        try { await SplashScreen.hide(); }
+        catch (e) { console.warn("SplashScreen hide failed:", e); }
+      }, 2000);
+    };
+
+    initApp();
+  }, []);
+
+  // --- Lifecycle: Back Button & History Handling ---
+  useEffect(() => {
     const setupBackButton = async () => {
       return await CapApp.addListener('backButton', ({ canGoBack }) => {
         if (targetPlayer !== null) setTargetPlayer(null);
@@ -143,13 +132,11 @@ function App() {
 
     const backListenerPromise = setupBackButton();
 
-    // 2. iOS/Android Swipe Gestures (History fallback)
     const handlePopState = () => {
       if (targetPlayer !== null) setTargetPlayer(null);
       else if (showResetConfirm) setShowResetConfirm(false);
     };
 
-    // 3. Sync the Browser History State via URL Hash
     const isModalOpen = targetPlayer !== null || showResetConfirm;
 
     if (isModalOpen) {
@@ -173,7 +160,7 @@ function App() {
     };
   }, [targetPlayer, showResetConfirm]);
 
-  // --- Logic: Game Actions ---
+// --- Logic: Game Actions ---
   const updatePlayerLife = useCallback((playerNum, delta) => {
     if (delta === 0) return;
     triggerHaptic(ImpactStyle.Light);
@@ -181,18 +168,22 @@ function App() {
 
     if (playerNum === 1) {
       setPlayer1Life(prev => {
-        const newVal = Math.max(0, prev + delta);
+        // Math.min forces it to never go above baseLifeP1
+        // Math.max forces it to never go below 0
+        const newVal = Math.min(baseLifeP1, Math.max(0, prev + delta));
         if (newVal === 0) setGameOver(2);
         return newVal;
       });
     } else {
       setPlayer2Life(prev => {
-        const newVal = Math.max(0, prev + delta);
+        // Math.min forces it to never go above baseLifeP2
+        // Math.max forces it to never go below 0
+        const newVal = Math.min(baseLifeP2, Math.max(0, prev + delta));
         if (newVal === 0) setGameOver(1);
         return newVal;
       });
     }
-  }, [player1Life, player2Life, triggerHaptic]);
+  }, [player1Life, player2Life, baseLifeP1, baseLifeP2, triggerHaptic]);
 
   const updateBaseLife = (playerNum, delta) => {
     triggerHaptic(ImpactStyle.Light);
@@ -218,6 +209,7 @@ function App() {
   const handleUndo = () => {
     if (history.length === 0) return;
     const prevState = history[history.length - 1];
+
     setPlayer1Life(prevState.p1);
     setPlayer2Life(prevState.p2);
     setGameOver(null);
@@ -232,6 +224,7 @@ function App() {
       p1 = Math.floor(Math.random() * 20) + 1;
       p2 = Math.floor(Math.random() * 20) + 1;
     } while (p1 === p2);
+
     setDiceRolls({ p1, p2, winner: p1 > p2 ? 1 : 2 });
   };
 
@@ -249,7 +242,7 @@ function App() {
     setTargetPlayer(null);
   };
 
-  // --- Gesture Handler ---
+  // --- Logic: Gesture Handling ---
   const handleTouchStart = (e) => {
     setTouchStartX(e.targetTouches[0].clientX);
     setTouchStartY(e.targetTouches[0].clientY);
@@ -264,22 +257,20 @@ function App() {
     const deltaX = touchEndX - touchStartX;
     const deltaY = touchEndY - touchStartY;
 
-    // Swipe Right
-    if (deltaX > 75 && Math.abs(deltaX) > Math.abs(deltaY)) {
+    // Swipe Right OR Swipe Down clears modals
+    if ((deltaX > 75 && Math.abs(deltaX) > Math.abs(deltaY)) ||
+        (deltaY > 75 && Math.abs(deltaY) > Math.abs(deltaX))) {
       if (targetPlayer !== null) setTargetPlayer(null);
       if (showResetConfirm) setShowResetConfirm(false);
-    }
-
-    // Swipe Down
-    if (deltaY > 75 && Math.abs(deltaY) > Math.abs(deltaX)) {
-       if (targetPlayer !== null) setTargetPlayer(null);
-       if (showResetConfirm) setShowResetConfirm(false);
     }
 
     setTouchStartX(null);
     setTouchStartY(null);
   };
 
+  // =========================================
+  // RENDER
+  // =========================================
   return (
     <div className="container main-screen">
       <img src={logo} alt="Momentum Logo" className="background-watermark" />
@@ -330,10 +321,11 @@ function App() {
         />
       </div>
 
-      {/* --- INITIAL SETUP / DICE ROLL MODAL --- */}
+      {/* --- INITIAL SETUP & DICE ROLL MODAL --- */}
       {!firstPlayer && !gameOver && (
         <div className="modal-backdrop">
           <div className="attack-panel attack-face-up">
+
             {diceRolls ? (
               <>
                 <h2>Roll Results</h2>
@@ -347,9 +339,11 @@ function App() {
                     <strong>{diceRolls.p2}</strong>
                   </div>
                 </div>
+
                 <h3 className="roll-winner" style={{ textAlign: 'center' }}>
                   Player {diceRolls.winner} goes first!
                 </h3>
+
                 <button
                   className="roll-button"
                   onClick={() => { setFirstPlayer(diceRolls.winner); setDiceRolls(null); }}
@@ -378,6 +372,7 @@ function App() {
                     </div>
                   </div>
                 </div>
+
                 <div className="setup-title">Who Goes First?</div>
                 <div className="block-buttons">
                   <button onClick={() => setFirstPlayer(1)}>Player 1</button>
@@ -386,6 +381,7 @@ function App() {
                 <button className="roll-button" onClick={rollDice}>🎲 ROLL D20s</button>
               </>
             )}
+
           </div>
         </div>
       )}
