@@ -22,8 +22,8 @@
   --border-tech:        2px solid #3d4f66; 
   --border-active:      2px solid var(--uvs-orange);
   /* Intensified the glows */
-  --glow-orange:        0 0 20px rgba(255, 85, 0, 0.6); 
-  --glow-blue:          0 0 20px rgba(0, 210, 255, 0.5); 
+  --glow-orange:        0 0 15px rgba(255, 85, 0, 0.6); 
+  --glow-blue:          0 0 15px rgba(0, 210, 255, 0.5); 
   --text-shadow-neon:   0 0 8px rgba(255, 255, 255, 0.4);
 }
 
